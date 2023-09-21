@@ -48,17 +48,104 @@ ALTER TABLE dbo.CovidVaccinations ALTER COLUMN excess_mortality  float;
 ALTER TABLE dbo.CovidVaccinations ALTER COLUMN excess_mortality_cumulative_per_million  float;
 
 
+--USING CTE
+WITH 
+	PopulationvsVaccination 
+	(Continent,Location,Date, 
+	Population,
+	NewVaccine,
+	DailyVaccine)
+AS 
+(
 --Join the CovidDeath and CovidVaccination Table looking at Total Population vs Vaccine
-Select Deaths.continent As Continent,Deaths.location AS Location, Deaths.date AS Date ,population AS Population, Vaccine.new_vaccinations AS 'New Vac'
-, SUM (Vaccine.new_vaccinations) OVER (PARTITION BY Deaths.Location ORDER BY   Deaths.date) AS 'Daily Vaccination Count'
+Select 
+	Deaths.continent As Continent,
+	Deaths.location AS Location,
+	Deaths.date AS Date ,
+	population AS Population, 
+	Vaccine.new_vaccinations AS 'New Vac',
+	SUM (Vaccine.new_vaccinations) OVER (PARTITION BY Deaths.Location ORDER BY Deaths.date) AS 'Daily Vaccination Count'
 --Did the partition by to have a count of the vaccination and location was used so when it gets to a different location ist start a new count
 -- To get the right count everyday i order by the date
-FROM CovidDeaths Deaths join CovidVaccinations Vaccine
-ON Deaths.location=Vaccine.location and Deaths.date=Vaccine.date
-WHERE Deaths.continent is not null
-ORDER BY 2, 3
+--Create a CTE or Temp table to get the VaccinationDaily RATE (Check the above)
+
+FROM 
+	CovidDeaths Deaths 
+JOIN 
+	CovidVaccinations Vaccine
+ON 
+	Deaths.location=Vaccine.location 
+	AND Deaths.date=Vaccine.date
+WHERE 
+	Deaths.continent is not null
+--ORDER BY 
+	--2, 3
+)
+SELECT 
+	*, 
+	ROUND((DailyVaccine/Population)*100,3) VaccinationRate
+FROM
+	PopulationvsVaccination
 
 
+--Using TempTable
+--Adding the DropTable if Exist for some new changes if they come
+DROP TABLE IF EXISTS #PopulationVaccinatedRate
+CREATE TABLE
+	#PopulationVaccinatedRate
+	(Continent nvarchar(255),
+	Location nvarchar(255),
+	Date datetime, 
+	Population float,
+	NewVaccine float,
+	DailyVaccine float)
+INSERT INTO 
+	#PopulationVaccinatedRate
+SELECT 
+	Deaths.continent As Continent,
+	Deaths.location AS Location,
+	Deaths.date AS Date ,
+	population AS Population, 
+	Vaccine.new_vaccinations AS 'New Vac',
+	SUM (Vaccine.new_vaccinations) OVER (PARTITION BY Deaths.Location ORDER BY Deaths.date) AS 'Daily Vaccination Count'
+FROM 
+	CovidDeaths Deaths 
+JOIN 
+	CovidVaccinations Vaccine
+ON 
+	Deaths.location=Vaccine.location 
+	AND Deaths.date=Vaccine.date
+WHERE 
+	Deaths.continent is not null
+--ORDER BY 
+	--2, 3
+SELECT 
+	*, 
+	ROUND((DailyVaccine/Population)*100,3) VaccinationRate
+FROM
+	#PopulationVaccinatedRate
+ORDER BY 2,3
 
 
-
+--CREATING VIEW FOR FUTURE VISULIZATION
+CREATE VIEW
+	PopulationVaccinatedRate AS
+SELECT 
+	Deaths.continent As Continent,
+	Deaths.location AS Location,
+	Deaths.date AS Date ,
+	population AS Population, 
+	Vaccine.new_vaccinations AS 'New Vac',
+	SUM (Vaccine.new_vaccinations) OVER (PARTITION BY Deaths.Location ORDER BY Deaths.date) AS 'Daily Vaccination Count'
+FROM 
+	CovidDeaths Deaths 
+JOIN 
+	CovidVaccinations Vaccine
+ON 
+	Deaths.location=Vaccine.location 
+	AND Deaths.date=Vaccine.date
+WHERE 
+	Deaths.continent is not null
+--ORDER BY 
+	--2, 3
+ 

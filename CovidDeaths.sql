@@ -88,3 +88,15 @@ where continent is not null
 ORDER BY 1,2 
 
 
+-- CREATE THE CONTIENT VIEW
+CREATE VIEW
+	ContinetTable AS
+SELECT 
+	location, 
+	MAX(total_deaths) AS 'Highest Continent Death Count' 
+FROM 
+	CovidDeaths
+WHERE 
+	continent is null
+GROUP BY
+	location 
