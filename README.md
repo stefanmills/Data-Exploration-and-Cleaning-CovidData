@@ -9,3 +9,5 @@ Please alter all these columns (reproduction_rate,icu_patients,icu_patients_per_
 weekly_hosp_admissions_per_million,total_deaths,total_cases,total_cases_per_million,total_deaths_per_million) to datatype float
 Use the above command for all the COlumns >>ALTER TABLE <tablename> ALTER COLUMN <column_name> <datatype>; (ALTER TABLE dbo.CovidDeaths ALTER COLUMN reproduction_rate float;) 
 File could not be uploaded because it was bigger than the required in github
+We will be using the Vaccination Table as well
+Please refresh your memory on the follwing, CTE,TEMP TABLE, VIEW, ORDER BY, PARTITION BY ,JOIN
