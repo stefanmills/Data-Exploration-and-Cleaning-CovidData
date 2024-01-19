@@ -1,4 +1,4 @@
-# CovidProjectSQL
+# Covid Data Cleaning and Exploration with SQL 
 
 This project focuses on analyzing Covid-19 deaths using data from [Our World in Data](https://ourworldindata.org/covid-deaths). It involves downloading the latest Covid-19 information from the provided website, splitting the data into two parts (CovidDeaths and CovidVaccinated), and saving them as .xlsx files. The project also includes importing the CovidDeaths data into your SQL server, data manipulation using SQL queries, and altering data types for specific columns. Due to the large file size, the data couldn't be uploaded directly to GitHub.
 
